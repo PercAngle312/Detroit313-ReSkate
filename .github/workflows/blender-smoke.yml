@@ -1,0 +1,32 @@
+name: Detroit 313 Windows Blender smoke test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  blender-smoke:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Blender
+        shell: pwsh
+        run: choco install blender --yes --no-progress
+      - name: Find Blender and generate smoke scene
+        shell: pwsh
+        run: |
+          $blender = Get-ChildItem "C:\Program Files\Blender Foundation" -Recurse -Filter blender.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $blender) { throw "Blender executable not found after installation" }
+          & $blender.FullName -b --factory-startup --python scripts/blender_smoke.py
+          if ($LASTEXITCODE -ne 0) { throw "Blender smoke test failed" }
+          if (-not (Test-Path build_output/Detroit313_BlenderSmoke.blend)) { throw "Expected blend missing" }
+      - name: Upload diagnostic artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: detroit313-blender-smoke
+          path: build_output/
+          if-no-files-found: warn
