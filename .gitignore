@@ -1,0 +1,9 @@
+*.exe
+*.dll
+*.blend
+*.fbx
+*.laz
+ReSkate Studio.zip
+build_output/
+__pycache__/
+*.pyc
