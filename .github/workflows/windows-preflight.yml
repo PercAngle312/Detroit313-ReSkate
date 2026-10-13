@@ -1,8 +1,9 @@
-name: Detroit 313 Windows source preflight
+name: Detroit 313 Windows preflight
 
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -13,19 +14,25 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 15
     steps:
-      - name: Checkout project
+      - name: Checkout source
         uses: actions/checkout@v4
-      - name: Set up Python
+      - name: Python 3.12
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Check authoring source availability and archive integrity
+      - name: Run source validator unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Check optional Detroit source archive
         shell: pwsh
         run: |
-          python scripts/audit_source.py --source inputs/Detroit313_Source.zip
-      - name: Explain next compiler prerequisites
+          if (Test-Path inputs/Detroit313_Source.zip) {
+            python scripts/audit_source.py --source inputs/Detroit313_Source.zip
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          } else {
+            Write-Host "::notice::No Detroit source archive in repository. Source package validation skipped."
+          }
+      - name: Explain compiler boundary
         shell: pwsh
         run: |
-          Write-Host "Windows runner is ready."
-          Write-Host "A validated source ZIP, Blender, authorized Studio compiler and game installation are still required for a map compile."
-          Write-Host "No ReSkate game assets are in this workflow."
+          Write-Host "Preflight only: no Blender scene or ReSkate map compiled."
+          Write-Host "Do not commit or upload unlicensed Studio/game binaries into this public repository."
