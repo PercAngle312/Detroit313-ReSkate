@@ -1,0 +1,21 @@
+{
+  "source": "Detroit313_Cloud_Source_Kit_v3.3.zip",
+  "files": {
+    "SPAWN_SURVEY_v24.json": {
+      "bytes": 3569,
+      "sha256": "41f4f9828b13dbe22cbef379f4e54bced4376bd7d5dec365e69b3df6469b6df1"
+    },
+    "exports/CAMPUS_COLLISION_CANDIDATE_v23/CampusMartius_TerrainCollision_CANDIDATE.glb": {
+      "bytes": 699740,
+      "sha256": "72bbcf888f4a3e22fa8e96959f266ebc96213bfc6f814a395e5eabbbc5a6fd1a"
+    },
+    "exports/CAMPUS_COLLISION_CANDIDATE_v23/CampusMartius_Roads_VISUAL_ONLY.glb": {
+      "bytes": 46104,
+      "sha256": "77df38bb41a0a689a0ed63056314c563466f4751a21570a64ebc524974f05b9c"
+    },
+    "exports/CAMPUS_COLLISION_CANDIDATE_v23/CampusMartius_Buildings_VISUAL_ONLY.glb": {
+      "bytes": 6072,
+      "sha256": "2726bf7ea94a4f7a0a58fbcc989172be5c4f6808054d92d50b82af0382a15d5b"
+    }
+  }
+}
