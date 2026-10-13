@@ -1,0 +1,55 @@
+name: Detroit 313 real Blender source scene
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'inputs/Detroit313_Cloud_Source_Kit_v3.3.zip'
+      - 'scripts/build_public_blend.py'
+      - 'scripts/inventory_detroit_assets.py'
+      - '.github/workflows/real-blender-scene.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build-blend:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate real source archive
+        shell: pwsh
+        run: |
+          python scripts/inventory_detroit_assets.py inputs/Detroit313_Cloud_Source_Kit_v3.3.zip
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Extract allowlisted source files
+        shell: pwsh
+        run: |
+          python -c "import zipfile; from pathlib import Path; z=zipfile.ZipFile('inputs/Detroit313_Cloud_Source_Kit_v3.3.zip'); src=[n for n in z.namelist() if n == 'prepare_detroit_sources.py']; assert len(src)==1; Path('prepare_detroit_sources.py').write_bytes(z.read(src[0]))"
+          python prepare_detroit_sources.py inputs/Detroit313_Cloud_Source_Kit_v3.3.zip --output build_input
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Install Blender
+        shell: pwsh
+        run: |
+          choco install blender --yes --no-progress
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Generate Blender scene from real Detroit geometry
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem "C:\Program Files\Blender Foundation" -Filter blender.exe -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $exe) { throw 'Blender not found' }
+          & $exe.FullName -b --factory-startup --python scripts/build_public_blend.py -- build_input build_output/Detroit313_CampusMartius_SOURCE.blend
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (-not (Test-Path build_output/Detroit313_CampusMartius_SOURCE.blend)) { throw 'Missing blend scene' }
+      - name: Save build diagnostics and scene
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Detroit313-CampusMartius-Blender-source
+          path: build_output/
+          if-no-files-found: warn
+          retention-days: 7
