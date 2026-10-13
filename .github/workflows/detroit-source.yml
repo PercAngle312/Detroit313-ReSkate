@@ -3,7 +3,7 @@ name: Detroit 313 Source Bundle CI
 on:
   push:
     paths:
-      - 'inputs/Detroit313_Source.zip'
+      - 'inputs/Detroit313_Cloud_Source_Kit_v3.3.zip'
       - 'scripts/**'
       - '.github/workflows/detroit-source.yml'
   workflow_dispatch:
@@ -20,13 +20,13 @@ jobs:
       - name: Validate source ZIP if uploaded
         shell: bash
         run: |
-          if [ ! -f inputs/Detroit313_Source.zip ]; then
-            echo "::notice::Upload the Detroit313_Source.zip source archive to inputs/ to activate the source package gate."
+          if [ ! -f inputs/Detroit313_Cloud_Source_Kit_v3.3.zip ]; then
+            echo "::notice::Upload the Detroit313_Cloud_Source_Kit_v3.3.zip source archive to inputs/ to activate the source package gate."
             exit 0
           fi
-          python scripts/audit_source.py --source inputs/Detroit313_Source.zip
-          python scripts/audit_detroit_bundle.py inputs/Detroit313_Source.zip
-          python scripts/inventory_detroit_assets.py inputs/Detroit313_Source.zip > inventory.json
+          python scripts/audit_source.py --source inputs/Detroit313_Cloud_Source_Kit_v3.3.zip
+          python scripts/audit_detroit_bundle.py inputs/Detroit313_Cloud_Source_Kit_v3.3.zip
+          python scripts/inventory_detroit_assets.py inputs/Detroit313_Cloud_Source_Kit_v3.3.zip > inventory.json
           python - <<'PY'
           import json
           report=json.load(open('inventory.json'))
@@ -34,7 +34,7 @@ jobs:
           print('Verified',len(report['assets']),'required source files')
           PY
       - name: Save source manifest
-        if: hashFiles('inputs/Detroit313_Source.zip') != ''
+        if: hashFiles('inputs/Detroit313_Cloud_Source_Kit_v3.3.zip') != ''
         uses: actions/upload-artifact@v4
         with:
           name: detroit313-source-inventory
