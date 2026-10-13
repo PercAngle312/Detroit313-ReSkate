@@ -15,8 +15,10 @@ try:
     import sk8_map_export as addon
 except ImportError as exc:
     raise RuntimeError("Install authorized ReSkate Studio Blender add-on first; do not commit its binary distribution") from exc
-if not hasattr(bpy.types.Scene,"sk8_map"):
+if not hasattr(bpy.context.scene, "sk8_map"):
     addon.register()
+if not hasattr(bpy.context.scene, "sk8_map"):
+    raise RuntimeError("Studio addon failed to register its scene properties")
 
 scene=bpy.context.scene
 scene.sk8_map.scale=1.0
@@ -39,7 +41,14 @@ if "FINISHED" not in result: raise RuntimeError("Studio export operator returned
 manifest=destination/"map.json"
 if not manifest.is_file(): raise RuntimeError("Studio failed to write map.json")
 doc=json.loads(manifest.read_text(encoding="utf-8"))
+if doc.get("format") != 1 or doc.get("units") != "meters":
+    raise RuntimeError("Studio map.json has unexpected format or units")
 if not doc.get("objects"): raise RuntimeError("Export produced no objects")
+exported_names = [obj.get("name", "") for obj in doc["objects"]]
+if not any("Terrain" in name for name in exported_names):
+    raise RuntimeError("Studio export lost the terrain mesh")
+if not manifest.parent.joinpath("meshes").is_dir():
+    raise RuntimeError("Studio export missing meshes directory")
 (destination/"detroit_studio_audit.json").write_text(json.dumps({
     "studio_export":"COMPLETED_NOT_COMPILED",
     "objects":{k:len(v) for k,v in names.items()},
