@@ -28,6 +28,8 @@ jobs:
           if (Test-Path inputs/Detroit313_Source.zip) {
             python scripts/audit_source.py --source inputs/Detroit313_Source.zip
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            python scripts/audit_detroit_bundle.py inputs/Detroit313_Source.zip
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           } else {
             Write-Host "::notice::No Detroit source archive in repository. Source package validation skipped."
           }
