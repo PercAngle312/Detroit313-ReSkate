@@ -1,0 +1,31 @@
+name: Detroit 313 Windows source preflight
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-preflight:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check authoring source availability and archive integrity
+        shell: pwsh
+        run: |
+          python scripts/audit_source.py --source inputs/Detroit313_Source.zip
+      - name: Explain next compiler prerequisites
+        shell: pwsh
+        run: |
+          Write-Host "Windows runner is ready."
+          Write-Host "A validated source ZIP, Blender, authorized Studio compiler and game installation are still required for a map compile."
+          Write-Host "No ReSkate game assets are in this workflow."
